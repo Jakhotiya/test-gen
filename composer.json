@@ -1,0 +1,14 @@
+{
+    "name": "jakhotiya/test-gen",
+    "description": "Magento module for generating units tests for a class",
+    "minimum-stability": "dev",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "abhishek",
+            "email": "jakhotiyaabhishek@gmail.com"
+        }
+    ],
+    "require": {
+    }
+}
