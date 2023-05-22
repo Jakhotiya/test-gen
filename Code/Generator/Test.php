@@ -47,6 +47,8 @@ class Test
      */
     private $definedClasses;
 
+    private $properties = [];
+
     /**
      * @param null|string $sourceClassName
      * @param null|string $resultClassName
@@ -189,6 +191,8 @@ class Test
             ],
         ];
 
+       return  $this->properties;
+
         return [$objectManager];
     }
 
@@ -203,8 +207,8 @@ class Test
     {
         $this->_classGenerator->setName($this->_getResultClassName())
             ->setExtendedClass(\PHPUnit\Framework\TestCase::class)
-            ->addProperties($this->_getClassProperties())
             ->addMethods($this->_getClassMethods())
+            ->addProperties($this->_getClassProperties())
             ->setClassDocBlock($this->_getClassDocBlock());
 
         return $this->_getGeneratedCode();
@@ -414,7 +418,28 @@ class Test
 
     protected function getSetupMethodBody()
     {
-        $body = '$this->subject = new ' . $this->getSourceClassName() . '();'.PHP_EOL;
+        $mocks = [];
+        $reflectionClass = new \ReflectionClass($this->getSourceClassName());
+        $constr = $reflectionClass->getConstructor();
+        foreach($constr->getParameters() as $parameter){
+            $type  = $this->getParameterClass($parameter);
+            if($type !== null){
+
+               $this->properties[] = [
+                   'name'=>$parameter->getName(),
+                   'visibility'=>'private',
+                   'defaultValue'=>null,
+                   'docblock'=>[
+                       'tags'=>[
+                           ['name'=>'var','description'=>'\\'.$type->getName()]
+                       ]
+                   ]
+               ];
+               $mocks[] = '$this->'.$parameter->getName().' = $this->createMock(\\'.$type->getName().'::class);';
+            }
+        }
+        $body = implode(PHP_EOL,$mocks);
+        $body .= '$this->subject = new ' . $this->getSourceClassName() . '();'.PHP_EOL;
         $body .= 'parent::setUp();';
         return $body;
     }
@@ -425,6 +450,7 @@ class Test
             [
                 'name'=>'setUp',
                 'parameters'=>[],
+                'visibility' => 'protected',
                 'body'=> $this->getSetupMethodBody(),
                  'returntype'=>'void',
                 ]
