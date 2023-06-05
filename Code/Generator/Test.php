@@ -182,18 +182,7 @@ class Test
      */
     protected function _getClassProperties()
     {
-        $objectManager = [
-            'name' => '_objectManager',
-            'visibility' => 'protected',
-            'docblock' => [
-                'shortDescription' => 'Object Manager instance',
-                'tags' => [['name' => 'var', 'description' => '\\' . \Magento\Framework\ObjectManagerInterface::class]],
-            ],
-        ];
-
        return  $this->properties;
-
-        return [$objectManager];
     }
 
 
@@ -210,6 +199,10 @@ class Test
             ->addMethods($this->_getClassMethods())
             ->addProperties($this->_getClassProperties())
             ->setClassDocBlock($this->_getClassDocBlock());
+
+        foreach($this->_classGenerator->getProperties() as $property){
+            $property->omitDefaultValue(true);
+        }
 
         return $this->_getGeneratedCode();
     }
@@ -421,6 +414,7 @@ class Test
         $mocks = [];
         $reflectionClass = new \ReflectionClass($this->getSourceClassName());
         $constr = $reflectionClass->getConstructor();
+        $args = [];
         foreach($constr->getParameters() as $parameter){
             $type  = $this->getParameterClass($parameter);
             if($type !== null){
@@ -428,18 +422,19 @@ class Test
                $this->properties[] = [
                    'name'=>$parameter->getName(),
                    'visibility'=>'private',
-                   'defaultValue'=>null,
+                   'omitDefaultValue'=>true,
                    'docblock'=>[
                        'tags'=>[
                            ['name'=>'var','description'=>'\\'.$type->getName()]
                        ]
                    ]
                ];
+               $args[] = '$this->'.$parameter->getName();
                $mocks[] = '$this->'.$parameter->getName().' = $this->createMock(\\'.$type->getName().'::class);';
             }
         }
-        $body = implode(PHP_EOL,$mocks);
-        $body .= '$this->subject = new ' . $this->getSourceClassName() . '();'.PHP_EOL;
+        $body = implode(PHP_EOL,$mocks).PHP_EOL;
+        $body .= '$this->subject = new ' . $this->getSourceClassName() . '('.implode(',',$args).');'.PHP_EOL;
         $body .= 'parent::setUp();';
         return $body;
     }

@@ -15,7 +15,11 @@ class Foo
         $this->acl = $acl;
     }
 
-    public function run(){
+    public function run(int $a){
+        if($a >= 4){
+            return $a;
+        }
+        return $a*4;
 
     }
 }

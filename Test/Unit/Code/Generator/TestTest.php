@@ -41,7 +41,9 @@ class TestTest extends \PHPUnit\Framework\TestCase
 
         $callback = function ($subject){
             return strpos($subject,'public function testRun()')!==false
+                && strpos($subject,'$this->subject->run(5)')!==false
                 && strpos($subject,'private $url;')!==false
+                && strpos($subject,'$this->subject = new \Jakhotiya\TestGen\Test\Unit\Code\Generator\Fixture\Foo($this->url,$this->acl)')!==false
                 && strpos($subject,'$this->url = $this->createMock(\Magento\Framework\Url::class);')!==false;
         };
 
