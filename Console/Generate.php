@@ -60,6 +60,7 @@ class Generate extends Command
         }
 
         $output->writeln('Done');
+        return 0;
     }
 
     private function getTestClassName($class){

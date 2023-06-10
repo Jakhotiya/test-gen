@@ -15,11 +15,22 @@ class Foo
         $this->acl = $acl;
     }
 
-    public function run(int $a){
+    public function withACallableFunction(callable $fn){
+        return $fn();
+    }
+
+    public function withClassAsNamedParameter(\DateTime $dateTime){
+
+    }
+    public function withNamedParameterType(int $a){
         if($a >= 4){
             return $a;
         }
         return $a*4;
+
+    }
+
+    public function methodWithUnionType(int|string $a){
 
     }
 }

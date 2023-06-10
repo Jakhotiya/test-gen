@@ -6,12 +6,7 @@ namespace Jakhotiya\TestGen\Test\Unit\Code\Generator;
  */
 class TestTest extends \PHPUnit\Framework\TestCase
 {
-    /**
-     * Object Manager instance
-     *
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
-    protected $_objectManager = null;
+   private $subject;
 
     private $io;
 

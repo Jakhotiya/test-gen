@@ -100,7 +100,7 @@ class Test
                 if ($sourceCode) {
                     $fileName = $this->_ioObject->generateResultFileName($this->_getResultClassName());
                     $this->_ioObject->writeResultFile($fileName, $sourceCode);
-                    return $fileName;
+                    return true;
                 } else {
                     $this->_addError('Can\'t generate source code.');
                 }
@@ -307,17 +307,19 @@ class Test
             return null;
         }
 
-        /** @var string|null $typeName */
-        $typeName = null;
-
-        if ($parameter->isArray()) {
-            $typeName = 'array';
+        /** @var string $typeName */
+        $typeName = '';
+        /** @var \ReflectionType $type */
+        $type = $parameter->getType();
+        //@TODO Handle UnionTypes and IntersectionTYpe
+        if(!$type instanceof \ReflectionNamedType){
+            return null;
+        }
+        /** @var \ReflectionNamedType $type */
+        if ($type->isBuiltin()) {
+            $typeName = $type->getName();
         } elseif ($parameterClass = $this->getParameterClass($parameter)) {
             $typeName = $this->_getFullyQualifiedClassName($parameterClass->getName());
-        } elseif ($parameter->isCallable()) {
-            $typeName = 'callable';
-        } else {
-            $typeName = $parameter->getType()->getName();
         }
 
         if ($parameter->allowsNull()) {
@@ -337,7 +339,7 @@ class Test
     private function getParameterClass(\ReflectionParameter $reflectionParameter): ?\ReflectionClass
     {
         $parameterType = $reflectionParameter->getType();
-
+        /** @var \ReflectionNamedType $parameterType */
         return $parameterType && !$parameterType->isBuiltin()
             ? new \ReflectionClass($parameterType->getName())
             : null;
