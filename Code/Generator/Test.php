@@ -435,6 +435,16 @@ class Test
                $mocks[] = '$this->'.$parameter->getName().' = $this->createMock(\\'.$type->getName().'::class);';
             }
         }
+        $this->properties[] = [
+            'name'=> 'subject',
+            'visibility'=>'private',
+            'omitDefaultValue'=>true,
+            'docblock'=>[
+                'tags'=>[
+                    ['name'=>'var','description'=>'\\'.$this->getSourceClassName()]
+                ]
+            ]
+        ];
         $body = implode(PHP_EOL,$mocks).PHP_EOL;
         $body .= '$this->subject = new ' . $this->getSourceClassName() . '('.implode(',',$args).');'.PHP_EOL;
         $body .= 'parent::setUp();';
