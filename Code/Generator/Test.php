@@ -417,22 +417,24 @@ class Test
         $reflectionClass = new \ReflectionClass($this->getSourceClassName());
         $constr = $reflectionClass->getConstructor();
         $args = [];
-        foreach($constr->getParameters() as $parameter){
-            $type  = $this->getParameterClass($parameter);
-            if($type !== null){
+        if($constr !== null) {
+            foreach ($constr->getParameters() as $parameter) {
+                $type = $this->getParameterClass($parameter);
+                if ($type !== null) {
 
-               $this->properties[] = [
-                   'name'=>$parameter->getName(),
-                   'visibility'=>'private',
-                   'omitDefaultValue'=>true,
-                   'docblock'=>[
-                       'tags'=>[
-                           ['name'=>'var','description'=>'\\'.$type->getName()]
-                       ]
-                   ]
-               ];
-               $args[] = '$this->'.$parameter->getName();
-               $mocks[] = '$this->'.$parameter->getName().' = $this->createMock(\\'.$type->getName().'::class);';
+                    $this->properties[] = [
+                        'name' => $parameter->getName(),
+                        'visibility' => 'private',
+                        'omitDefaultValue' => true,
+                        'docblock' => [
+                            'tags' => [
+                                ['name' => 'var', 'description' => '\\' . $type->getName()]
+                            ]
+                        ]
+                    ];
+                    $args[] = '$this->' . $parameter->getName();
+                    $mocks[] = '$this->' . $parameter->getName() . ' = $this->createMock(\\' . $type->getName() . '::class);';
+                }
             }
         }
         $this->properties[] = [
