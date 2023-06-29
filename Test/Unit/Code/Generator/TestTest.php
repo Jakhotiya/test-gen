@@ -6,11 +6,13 @@ namespace Jakhotiya\TestGen\Test\Unit\Code\Generator;
  */
 class TestTest extends \PHPUnit\Framework\TestCase
 {
-   private $subject;
+    private $subject;
 
     private $io;
 
     private $definedClass;
+
+    private $classGenerator;
 
     protected function setUp() : void
     {
@@ -18,8 +20,8 @@ class TestTest extends \PHPUnit\Framework\TestCase
         $resultClassName = '\Jakhotiya\TestGen\Test\Unit\Code\Generator\Fixture\FooTest';
         $this->io = $this->createMock(\Jakhotiya\TestGen\Code\Generator\Io::class);
         $this->definedClass = $this->createMock(\Magento\Framework\Code\Generator\DefinedClasses::class);
-        $classGenerator = new \Magento\Framework\Code\Generator\ClassGenerator();
-        $this->subject = new \Jakhotiya\TestGen\Code\Generator\Test($sourceClass,$resultClassName,$this->io,$classGenerator,$this->definedClass);
+        $this->classGenerator = new \Magento\Framework\Code\Generator\ClassGenerator();
+        $this->subject = new \Jakhotiya\TestGen\Code\Generator\Test($sourceClass,$resultClassName,$this->io,$this->classGenerator,$this->definedClass);
         parent::setUp();
     }
 
@@ -47,9 +49,31 @@ class TestTest extends \PHPUnit\Framework\TestCase
             ->method('writeResultFile')
             ->with($resultFilename,$this->callback($callback),);
         $this->subject->generate();
-
-
     }
 
+    public function testGenerateOfClassWithoutConstructor()
+    {
+        $sourceClass = \Jakhotiya\TestGen\Test\Unit\Code\Generator\Fixture\Bar::class;
+        $resultClassName = '\Jakhotiya\TestGen\Test\Unit\Code\Generator\Fixture\BarTest';
+        $this->subject = new \Jakhotiya\TestGen\Code\Generator\Test($sourceClass,$resultClassName,$this->io,$this->classGenerator,$this->definedClass);
+
+        $this->definedClass->method('isClassLoadable')->willReturn(true);
+        $this->io->method('makeResultFileDirectory')->willReturn(true);
+        $this->io->method('fileExists')->willReturn(true);
+        $resultFilename = 'app/code/Jakhotiya/TestGen/Test/Unit/Code/Generator/Fixture/BarTest.php';
+        $this->io->method('generateResultFileName')->willReturn($resultFilename);
+
+        $callback = function ($generateClassCode){
+            self::assertStringContainsString('public function testWithACallableFunction(',$generateClassCode);
+            self::assertStringContainsString('$this->subject->withACallableFunction',$generateClassCode);
+            self::assertStringContainsString('$this->subject = new \Jakhotiya\TestGen\Test\Unit\Code\Generator\Fixture\Bar()',$generateClassCode);
+            return true;
+        };
+
+        $this->io->expects($this->once())
+            ->method('writeResultFile')
+            ->with($resultFilename,$this->callback($callback),);
+        $this->subject->generate();
+    }
 
 }
